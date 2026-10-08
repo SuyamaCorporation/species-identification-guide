@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Species Identification Guide</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-emerald-50 min-h-screen">
+<div class="max-w-5xl mx-auto p-4">
+  <header class="text-center py-6">
+    <h1 class="text-3xl font-bold text-emerald-900">🔎 Species Identification Guide</h1>
+    <p class="text-emerald-700 mt-1">Build identification keys & log sightings for plants, insects, or animals</p>
+  </header>
+
+  <!-- Tabs -->
+  <div class="flex gap-2 mb-6">
+    <button onclick="setTab('identify')" id="tab-identify" class="px-4 py-2 rounded-full text-sm font-medium transition bg-emerald-600 text-white">🔍 Identify</button>
+    <button onclick="setTab('manage')" id="tab-manage" class="px-4 py-2 rounded-full text-sm font-medium transition bg-white text-gray-600 border border-gray-300 hover:border-emerald-400">🗂 Manage Species</button>
+    <button onclick="setTab('sightings')" id="tab-sightings" class="px-4 py-2 rounded-full text-sm font-medium transition bg-white text-gray-600 border border-gray-300 hover:border-emerald-400">📋 Sightings Log</button>
+  </div>
+
+  <!-- Identify Tab -->
+  <div id="panel-identify">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-2xl shadow p-5 border border-emerald-200">
+        <h2 class="font-semibold text-emerald-800 mb-4">Identification Key</h2>
+        <div>
+          <label class="text-xs font-medium text-gray-600 mb-2 block">Kingdom / Group</label>
+          <select id="groupSelect" onchange="startIdentification()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 mb-4">
+            <option value="">-- Select group --</option>
+            <option value="plants">Plants</option>
+            <option value="insects">Insects</option>
+            <option value="birds">Birds</option>
+            <option value="mammals">Mammals</option>
+          </select>
+        </div>
+        <div id="questionTree" class="space-y-3"></div>
+        <div id="identResult" class="mt-4"></div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow p-5 border border-emerald-200">
+        <h2 class="font-semibold text-emerald-800 mb-3">Your Local Flora/Fauna</h2>
+        <input id="speciesSearch" type="text" placeholder="Search species..." oninput="renderSpeciesList()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 mb-3">
+        <div id="speciesList" class="space-y-2 max-h-80 overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage Species Tab -->
+  <div id="panel-manage" class="hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-2xl shadow p-5 border border-emerald-200">
+        <h2 class="font-semibold text-emerald-800 mb-4">Add Species to Database</h2>
+        <div class="space-y-3">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-xs font-medium text-gray-600">Common Name</label>
+              <input id="spCommonName" type="text" placeholder="e.g. Monarch Butterfly" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-600">Scientific Name</label>
+              <input id="spScientific" type="text" placeholder="Danaus plexippus" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 italic">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-xs font-medium text-gray-600">Group</label>
+              <select id="spGroup" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                <option value="plants">Plants</option>
+                <option value="insects">Insects</option>
+                <option value="birds">Birds</option>
+                <option value="mammals">Mammals</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-600">Status</label>
+              <select id="spStatus" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                <option value="common">Common</option>
+                <option value="uncommon">Uncommon</option>
+                <option value="rare">Rare</option>
+                <option value="endangered">Endangered</option>
+                <option value="invasive">Invasive</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="text-xs font-medium text-gray-600">Key Identifying Traits (one per line)</label>
+            <textarea id="spTraits" rows="4" placeholder="Orange wings with black veins&#10;White spots on wing margins&#10;Wingspan 8.9-10.2cm&#10;Milkweed dependent" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"></textarea>
+          </div>
+          <div>
+            <label class="text-xs font-medium text-gray-600">Habitat</label>
+            <input id="spHabitat" type="text" placeholder="Meadows, gardens, milkweed patches" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          </div>
+          <div>
+            <label class="text-xs font-medium text-gray-600">Season</label>
+            <input id="spSeason" type="text" placeholder="Spring, Summer, Fall (migratory)" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          </div>
+          <div>
+            <label class="text-xs font-medium text-gray-600">Notes</label>
+            <textarea id="spNotes" rows="2" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"></textarea>
+          </div>
+          <button onclick="addSpecies()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg transition">+ Add Species</button>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl shadow p-5 border border-emerald-200">
+        <h2 class="font-semibold text-emerald-800 mb-3">Species Database</h2>
+        <div id="manageSpeciesList" class="space-y-2 max-h-[500px] overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sightings Tab -->
+  <div id="panel-sightings" class="hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-2xl shadow p-5 border border-emerald-200">
+        <h2 class="font-semibold text-emerald-800 mb-4">Log Sighting</h2>
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs font-medium text-gray-600">Species</label>
+            <select id="sightingSpecies" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"></select>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-xs font-medium text-gray-600">Date</label>
+              <input id="sightingDate" type="date" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-600">Count</label>
+              <input id="sightingCount" type="number" min="1" value="1" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+            </div>
+          </div>
+          <div>
+            <label class="text-xs font-medium text-gray-600">Location</label>
+            <input id="sightingLocation" type="text" placeholder="Park, backyard, trail name..." class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+          </div>
+          <div>
+            <label class="text-xs font-medium text-gray-600">Behavior / Notes</label>
+            <textarea id="sightingNotes" rows="2" placeholder="What was it doing? Notable features?" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"></textarea>
+          </div>
+          <div>
+            <label class="text-xs font-medium text-gray-600">Confidence</label>
+            <select id="sightingConfidence" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+              <option value="certain">Certain</option>
+              <option value="likely">Likely</option>
+              <option value="possible">Possible</option>
+            </select>
+          </div>
+          <button onclick="addSighting()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg transition">+ Log Sighting</button>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl shadow p-5 border border-emerald-200">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-semibold text-emerald-800">Sightings Log</h2>
+          <span class="text-xs text-gray-400" id="sightingCount">0 sightings</span>
+        </div>
+        <div id="sightingsList" class="space-y-2 max-h-[480px] overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const IDENT_TREES = {
+  plants: [
+    { q: 'Does it have flowers?', yes: { q: 'Are the petals 5 or more?', yes: { result: ['Flowering Dicot','Possibly: Rose, Buttercup, Clover'] }, no: { result: ['Monocot or Simple Flower','Possibly: Grass, Lily, Iris'] } }, no: { q: 'Does it have needles or scales?', yes: { result: ['Conifer','Possibly: Pine, Spruce, Fir, Juniper'] }, no: { q: 'Does it have spores (fern-like)?', yes: { result: ['Fern or Mosses','Possibly: Fern, Horsetail, Moss'] }, no: { result: ['Non-flowering Vascular Plant','Possibly: Cycad, Ginkgo'] } } } }
+  ],
+  insects: [
+    { q: 'Does it have wings?', yes: { q: 'Does it have 4 wings?', yes: { q: 'Are the wings covered in scales?', yes: { result: ['Lepidoptera','Possibly: Butterfly, Moth'] }, no: { result: ['Hymenoptera or Odonata','Possibly: Bee, Wasp, Dragonfly'] } }, no: { result: ['Diptera','Possibly: Fly, Mosquito, Gnat'] } }, no: { q: 'Does it have more than 6 legs?', yes: { result: ['Arachnid or Myriapod','Possibly: Spider, Tick, Centipede'] }, no: { result: ['Wingless Insect','Possibly: Ant, Cricket, Earwig'] } } }
+  ],
+  birds: [
+    { q: 'Is it larger than a pigeon?', yes: { q: 'Does it have a hooked beak?', yes: { result: ['Raptor / Bird of Prey','Possibly: Hawk, Eagle, Falcon, Owl'] }, no: { q: 'Does it wade in water?', yes: { result: ['Wading Bird','Possibly: Heron, Egret, Crane'] }, no: { result: ['Large Perching/Ground Bird','Possibly: Crow, Raven, Turkey'] } } }, no: { q: 'Does it sing melodically?', yes: { q: 'Does it have a red/orange breast?', yes: { result: ['Robin-like Thrush','Possibly: Robin, Bluebird'] }, no: { result: ['Songbird','Possibly: Warbler, Sparrow, Finch'] } }, no: { result: ['Small Non-singing Bird','Possibly: Chickadee, Nuthatch, Woodpecker'] } } }
+  ],
+  mammals: [
+    { q: 'Is it larger than a house cat?', yes: { q: 'Does it have hooves?', yes: { result: ['Ungulate','Possibly: Deer, Elk, Moose'] }, no: { q: 'Is it carnivorous?', yes: { result: ['Large Carnivore','Possibly: Fox, Coyote, Raccoon, Bear'] }, no: { result: ['Large Omnivore/Herbivore','Possibly: Groundhog, Beaver, Porcupine'] } } }, no: { q: 'Can it fly?', yes: { result: ['Bat (Chiroptera)','Possibly: Little Brown Bat, Big Brown Bat'] }, no: { q: 'Is it primarily nocturnal?', yes: { result: ['Small Nocturnal Mammal','Possibly: Shrew, Vole, Mouse, Mole'] }, no: { result: ['Small Diurnal Mammal','Possibly: Squirrel, Chipmunk, Rabbit'] } } } }
+  ],
+};
+
+let speciesDB = JSON.parse(localStorage.getItem('species_db') || '[]');
+let sightings = JSON.parse(localStorage.getItem('species_sightings') || '[]');
+let identPath = [];
+let identGroup = '';
+
+function save() {
+  localStorage.setItem('species_db', JSON.stringify(speciesDB));
+  localStorage.setItem('species_sightings', JSON.stringify(sightings));
+}
+
+function setTab(tab) {
+  ['identify','manage','sightings'].forEach(t => {
+    document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== tab);
+    const btn = document.getElementById(`tab-${t}`);
+    if (t === tab) btn.className = 'px-4 py-2 rounded-full text-sm font-medium transition bg-emerald-600 text-white';
+    else btn.className = 'px-4 py-2 rounded-full text-sm font-medium transition bg-white text-gray-600 border border-gray-300 hover:border-emerald-400';
+  });
+  if (tab === 'sightings') updateSightingSpeciesSelect();
+  if (tab === 'manage') renderManageList();
+}
+
+function startIdentification() {
+  identGroup = document.getElementById('groupSelect').value;
+  identPath = [];
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const container = document.getElementById('questionTree');
+  document.getElementById('identResult').innerHTML = '';
+  if (!identGroup || !IDENT_TREES[identGroup]) { container.innerHTML = ''; return; }
+
+  const tree = IDENT_TREES[identGroup][0];
+  let node = tree;
+  for (const answer of identPath) {
+    node = answer === 'yes' ? node.yes : node.no;
+    if (!node) break;
+  }
+
+  if (!node || node.result) {
+    container.innerHTML = '';
+    if (node?.result) {
+      document.getElementById('identResult').innerHTML = `
+        <div class="bg-emerald-100 border border-emerald-300 rounded-xl p-4">
+          <p class="text-xs text-emerald-600 uppercase font-bold mb-1">Identification Result</p>
+          <p class="font-bold text-emerald-900 text-lg">${node.result[0]}</p>
+          <p class="text-emerald-700 text-sm">${node.result[1]}</p>
+          <button onclick="identPath=[];renderQuestion()" class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-1.5 rounded-lg">Start Over</button>
+        </div>`;
+    }
+    return;
+  }
+
+  // Show breadcrumb
+  const breadcrumb = identPath.length > 0 ? `<div class="text-xs text-gray-400 mb-3 flex items-center gap-1 flex-wrap">
+    ${identPath.map((a, i) => `<span class="bg-gray-100 px-2 py-0.5 rounded">${a}</span>${i < identPath.length-1 ? '→' : ''}`).join('')}
+    <button onclick="identPath.pop();renderQuestion()" class="text-red-400 hover:text-red-600 ml-2">← Back</button>
+  </div>` : '';
+
+  container.innerHTML = `
+    ${breadcrumb}
+    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+      <p class="font-medium text-gray-800 mb-4">${node.q}</p>
+      <div class="flex gap-3">
+        <button onclick="identPath.push('yes');renderQuestion()" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg transition">Yes</button>
+        <button onclick="identPath.push('no');renderQuestion()" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-lg transition">No</button>
+      </div>
+    </div>`;
+}
+
+function renderSpeciesList() {
+  const search = document.getElementById('speciesSearch').value.toLowerCase();
+  const filtered = speciesDB.filter(s => !search || s.commonName.toLowerCase().includes(search) || (s.scientific||'').toLowerCase().includes(search));
+  const container = document.getElementById('speciesList');
+  const GROUP_EMOJI = {plants:'🌿',insects:'🦋',birds:'🐦',mammals:'🦊',other:'🔍'};
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<p class="text-gray-400 text-sm italic text-center py-4">${speciesDB.length === 0 ? 'Add species in the Manage tab' : 'No matches found'}</p>`;
+    return;
+  }
+  container.innerHTML = filtered.map(s => `
+    <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100 cursor-pointer hover:border-emerald-300" onclick="quickLogSighting('${s.id}')">
+      <div class="flex items-start gap-2">
+        <span class="text-xl">${GROUP_EMOJI[s.group] || '🔍'}</span>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-emerald-900">${s.commonName}</p>
+          <p class="text-xs italic text-gray-400">${s.scientific || ''}</p>
+          ${s.traits.length > 0 ? `<p class="text-xs text-gray-600 mt-1">${s.traits.slice(0,2).join(' · ')}</p>` : ''}
+          <div class="flex flex-wrap gap-1 mt-1">
+            ${s.habitat ? `<span class="text-xs bg-white text-gray-500 px-2 py-0.5 rounded-full border">${s.habitat}</span>` : ''}
+            ${s.status ? `<span class="text-xs bg-white text-${s.status==='endangered'?'red':s.status==='invasive'?'orange':'green'}-700 px-2 py-0.5 rounded-full border">${s.status}</span>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function addSpecies() {
+  const name = document.getElementById('spCommonName').value.trim();
+  if (!name) return alert('Common name required');
+  speciesDB.push({
+    id: Date.now().toString(),
+    commonName: name,
+    scientific: document.getElementById('spScientific').value.trim(),
+    group: document.getElementById('spGroup').value,
+    status: document.getElementById('spStatus').value,
+    traits: document.getElementById('spTraits').value.split('\n').map(t=>t.trim()).filter(Boolean),
+    habitat: document.getElementById('spHabitat').value.trim(),
+    season: document.getElementById('spSeason').value.trim(),
+    notes: document.getElementById('spNotes').value.trim()
+  });
+  save();
+  renderManageList();
+  renderSpeciesList();
+  ['spCommonName','spScientific','spTraits','spHabitat','spSeason','spNotes'].forEach(id => document.getElementById(id).value = '');
+}
+
+function renderManageList() {
+  const container = document.getElementById('manageSpeciesList');
+  if (speciesDB.length === 0) { container.innerHTML = '<p class="text-gray-400 text-sm italic">No species yet. Add some!</p>'; return; }
+  container.innerHTML = speciesDB.map(s => `
+    <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="font-semibold text-emerald-900">${s.commonName}</p>
+          <p class="text-xs italic text-gray-400">${s.scientific || ''} · ${s.group}</p>
+          <p class="text-xs text-gray-500 mt-1">${s.traits.slice(0,2).join(' · ')}</p>
+        </div>
+        <button onclick="speciesDB=speciesDB.filter(x=>x.id!=='${s.id}');save();renderManageList();renderSpeciesList()" class="text-gray-300 hover:text-red-400">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function updateSightingSpeciesSelect() {
+  const sel = document.getElementById('sightingSpecies');
+  sel.innerHTML = speciesDB.length === 0
+    ? '<option value="">No species — add in Manage tab</option>'
+    : speciesDB.map(s => `<option value="${s.id}">${s.commonName}</option>`).join('');
+}
+
+function quickLogSighting(id) {
+  setTab('sightings');
+  document.getElementById('sightingSpecies').value = id;
+}
+
+function addSighting() {
+  const spId = document.getElementById('sightingSpecies').value;
+  if (!spId) return alert('Select a species');
+  const date = document.getElementById('sightingDate').value;
+  const sp = speciesDB.find(s => s.id === spId);
+  sightings.unshift({
+    id: Date.now().toString(),
+    speciesId: spId,
+    speciesName: sp?.commonName || 'Unknown',
+    date: date || new Date().toISOString().split('T')[0],
+    count: parseInt(document.getElementById('sightingCount').value) || 1,
+    location: document.getElementById('sightingLocation').value.trim(),
+    notes: document.getElementById('sightingNotes').value.trim(),
+    confidence: document.getElementById('sightingConfidence').value
+  });
+  save();
+  renderSightings();
+  ['sightingLocation','sightingNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('sightingCount').value = '1';
+}
+
+function renderSightings() {
+  const container = document.getElementById('sightingsList');
+  document.getElementById('sightingCount').textContent = `${sightings.length} sightings`;
+  if (sightings.length === 0) { container.innerHTML = '<p class="text-gray-400 text-sm italic text-center py-4">No sightings logged yet</p>'; return; }
+  const CONF = { certain: 'bg-green-100 text-green-700', likely: 'bg-yellow-100 text-yellow-700', possible: 'bg-gray-100 text-gray-600' };
+  container.innerHTML = sightings.map(s => `
+    <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+      <div class="flex justify-between">
+        <div class="flex-1">
+          <p class="font-semibold text-emerald-900">${s.speciesName}</p>
+          <div class="flex flex-wrap gap-2 text-xs mt-1">
+            <span class="text-gray-500">${s.date}</span>
+            <span class="text-emerald-600">×${s.count}</span>
+            ${s.location ? `<span class="text-gray-500">📍 ${s.location}</span>` : ''}
+            <span class="${CONF[s.confidence] || 'bg-gray-100'} px-1.5 py-0.5 rounded-full">${s.confidence}</span>
+          </div>
+          ${s.notes ? `<p class="text-xs text-gray-500 mt-1 italic">${s.notes}</p>` : ''}
+        </div>
+        <button onclick="sightings=sightings.filter(x=>x.id!=='${s.id}');save();renderSightings()" class="text-gray-300 hover:text-red-400 text-sm">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+document.getElementById('sightingDate').value = new Date().toISOString().split('T')[0];
+renderSpeciesList();
+renderSightings();
+updateSightingSpeciesSelect();
+</script>
+</body>
+</html>
